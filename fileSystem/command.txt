@@ -1,1 +1,1 @@
-create a file hello.txt
+add to the file /home/akash/Desktop/UNCC/test/hello.txt this content: akakkakakak
