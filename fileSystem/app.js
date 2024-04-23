@@ -23,18 +23,44 @@ const fs = require("fs/promises");
     }
   };
   const deleteFile = async (path) => {
-    console.log(`deleting file ${path}`);
-    
+    try {
+      await fs.unlink(path);
+    } catch (e) {
+      if (e.code === "ENOENT") {
+        console.log("no file in the directory");
+      } else {
+        console.log("erroe occored while deleting the file");
+      }
+    }
   };
-  const renameFile=(oldPath, newPath)=>{
-    console.log(`renaming file from ${oldPath} to ${newPath}`)
-  }
-  const copyFile = (oldpath, newPath)=>{
-    console.log(`copying file from ${oldpath} to ${newPath}`)
-  }
-  const addToFile=(path, content)=>{
-console.log(`adding ${content} to file:${path}`)
-  }
+  const renameFile = async (oldPath, newPath) => {
+    try {
+      await fs.rename(oldPath, newPath);
+      console.log(`file is succesfully renamed`);
+    } catch (e) {
+      if (e.code === "ENOENT") {
+        console.log(`file doesn't exist`);
+      } else {
+        console.log("directory is not exist");
+      }
+    }
+  };
+  const copyFile = async (oldpath, newPath) => {
+    try {
+      await fs.copyFile(oldpath, newPath);
+    } catch (e) {
+      console.log(e.Error);
+    }
+  };
+  const addToFile = async (path, content) => {
+    try {
+      const fileHandler = await fs.open(path, "a");
+      await fileHandler.write(content);
+      fileHandler.close()
+    } catch (e) {
+      console.log(e.Error);
+    }
+  };
 
   const commandFileHandler = await fs.open("./command.txt", "r");
 
@@ -65,19 +91,19 @@ console.log(`adding ${content} to file:${path}`)
       const _idx = command.indexOf(" to ");
       const oldPath = command.substring(COPY_FILE.length + 1, _idx);
       const newPath = command.substring(_idx + 4);
-      copyFile(oldPath, newPath)
+      copyFile(oldPath, newPath);
     }
     if (command.includes(RENAME_FILE)) {
       const _idx = command.indexOf(" to ");
       const oldPath = command.substring(RENAME_FILE.length + 1, _idx);
       const newPath = command.substring(_idx + 4);
-      renameFile(oldPath, newPath)
+      renameFile(oldPath, newPath);
     }
     if (command.includes(ADD_FILE)) {
       const _idx = command.indexOf(" this content: ");
       const filePath = command.substring(ADD_FILE.length + 1, _idx);
       const content = command.substring(_idx + " this content: ".length);
-      addToFile(filePath, content)
+      addToFile(filePath, content);
     }
   });
   const watcher = fs.watch("./command.txt");
